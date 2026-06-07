@@ -1,63 +1,114 @@
 @import "tailwindcss";
 
 /* ============================================
-   PeopleSync Design System
+   PeopleSync Design System — True Dark Mode Fix
    ============================================ */
 
-@theme inline {
-  --color-background: #ffffff;
-  --color-foreground: #0f172a;
-  --color-card: #ffffff;
-  --color-card-foreground: #0f172a;
-  --color-popover: #ffffff;
-  --color-popover-foreground: #0f172a;
-  --color-primary: #2563eb;
-  --color-primary-foreground: #f8fafc;
-  --color-secondary: #f1f5f9;
-  --color-secondary-foreground: #0f172a;
-  --color-muted: #f1f5f9;
-  --color-muted-foreground: #64748b;
-  --color-accent: #f1f5f9;
-  --color-accent-foreground: #0f172a;
-  --color-destructive: #ef4444;
-  --color-destructive-foreground: #f8fafc;
-  --color-border: #e2e8f0;
-  --color-input: #e2e8f0;
-  --color-ring: #2563eb;
-  --color-success: #22c55e;
-  --color-warning: #f59e0b;
+/* Disable default media-query dark mode in v4 if it's interfering, 
+   though simply defining our custom properties should suffice. */
 
-  --radius-sm: 0.375rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
+  --radius-3xl: 2.5rem;
 
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --shadow-organic: 0 10px 40px -10px rgba(0,0,0,0.08);
+  --shadow-organic-inner: 0 4px 12px rgba(0,0,0,0.05);
 }
 
-/* Dark Mode */
+:root {
+  /* LIGHT MODE - Pure, bright, airy */
+  --background: #f4f5f7;
+  --foreground: #09090b;
+  
+  --card: #ffffff;
+  --card-foreground: #09090b;
+  
+  --popover: #ffffff;
+  --popover-foreground: #09090b;
+  
+  /* Primary Action: High-contrast black */
+  --primary: #18181b;
+  --primary-foreground: #ffffff;
+  
+  --secondary: #f4f4f5;
+  --secondary-foreground: #18181b;
+  
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+  
+  --accent: #f4f4f5;
+  --accent-foreground: #18181b;
+  
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  
+  --border: #e4e4e7;
+  --input: #e4e4e7;
+  --ring: #18181b;
+}
+
 .dark {
-  --color-background: #09090b;
-  --color-foreground: #f8fafc;
-  --color-card: #111114;
-  --color-card-foreground: #f8fafc;
-  --color-popover: #111114;
-  --color-popover-foreground: #f8fafc;
-  --color-primary: #3b82f6;
-  --color-primary-foreground: #f8fafc;
-  --color-secondary: #1e1e22;
-  --color-secondary-foreground: #f8fafc;
-  --color-muted: #1e1e22;
-  --color-muted-foreground: #94a3b8;
-  --color-accent: #1e1e22;
-  --color-accent-foreground: #f8fafc;
-  --color-destructive: #dc2626;
-  --color-destructive-foreground: #f8fafc;
-  --color-border: #1e293b;
-  --color-input: #1e293b;
-  --color-ring: #3b82f6;
-  --color-success: #16a34a;
-  --color-warning: #d97706;
+  /* DARK MODE - Deep slate/blue-gray */
+  --background: #0f172a;
+  --foreground: #f8fafc;
+  
+  --card: #1e293b;
+  --card-foreground: #f8fafc;
+  
+  --popover: #1e293b;
+  --popover-foreground: #f8fafc;
+  
+  /* Primary Action: Bright blue to contrast dark slate */
+  --primary: #3b82f6;
+  --primary-foreground: #ffffff;
+  
+  --secondary: #334155;
+  --secondary-foreground: #f8fafc;
+  
+  --muted: #334155;
+  --muted-foreground: #94a3b8;
+  
+  --accent: #334155;
+  --accent-foreground: #f8fafc;
+  
+  --destructive: #f87171;
+  --destructive-foreground: #ffffff;
+  
+  --border: #334155;
+  --input: #334155;
+  --ring: #3b82f6;
 }
 
 /* ============================================
@@ -69,36 +120,16 @@
     border-color: var(--color-border);
   }
 
-  body {
+  html, body {
     background-color: var(--color-background);
     color: var(--color-foreground);
-    font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-  }
-
-  /* Custom scrollbar */
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    background: var(--color-border);
-    border-radius: 3px;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    background: var(--color-muted-foreground);
   }
 }
 
 /* ============================================
-   Animations
+   Animations & Utilities
    ============================================ */
 
 @keyframes fade-in {
@@ -106,42 +137,50 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes slide-in-right {
-  from { opacity: 0; transform: translateX(12px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-@keyframes pulse-subtle {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
-}
-
 .animate-fade-in {
   animation: fade-in 0.3s ease-out;
 }
 
-.animate-slide-in-right {
-  animation: slide-in-right 0.3s ease-out;
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
-.animate-shimmer {
-  background: linear-gradient(90deg, var(--color-muted) 25%, var(--color-border) 50%, var(--color-muted) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
+/* The massive floating app window */
+.app-window {
+  background-color: var(--color-card);
+  border-radius: var(--radius-3xl);
+  box-shadow: var(--shadow-organic);
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
-.animate-pulse-subtle {
-  animation: pulse-subtle 2s ease-in-out infinite;
+.dark .app-window {
+  box-shadow: none;
 }
 
-/* ============================================
-   Focus ring utility
-   ============================================ */
+/* Inner organic cards */
+.organic-card {
+  background-color: var(--color-background);
+  border-radius: var(--radius-2xl);
+  padding: 2rem;
+  transition: all 0.2s ease;
+}
+
+.organic-card-hoverable:hover {
+  background-color: var(--color-card);
+  box-shadow: var(--shadow-organic-inner);
+  transform: translateY(-2px);
+}
+
+.dark .organic-card-hoverable:hover {
+  box-shadow: none;
+  border-color: var(--color-muted-foreground);
+}
 
 .focus-ring {
   outline: none;
@@ -150,5 +189,5 @@
 .focus-ring:focus-visible {
   outline: 2px solid var(--color-ring);
   outline-offset: 2px;
-  border-radius: var(--radius-sm);
+  border-radius: inherit;
 }

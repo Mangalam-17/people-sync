@@ -15,10 +15,18 @@ import {
   Star,
   Settings,
   ArrowRight,
+  Building2,
+  Users2,
+  Award,
+  Network,
 } from 'lucide-react';
 
 const commandItems = [
   { id: 'dashboard', label: 'Go to Dashboard', icon: LayoutDashboard, href: '/dashboard', group: 'Navigation' },
+  { id: 'departments', label: 'Go to Departments', icon: Building2, href: '/dashboard/departments', group: 'Organization' },
+  { id: 'teams', label: 'Go to Teams', icon: Users2, href: '/dashboard/teams', group: 'Organization' },
+  { id: 'designations', label: 'Go to Designations', icon: Award, href: '/dashboard/designations', group: 'Organization' },
+  { id: 'org-chart', label: 'Go to Org Chart', icon: Network, href: '/dashboard/org-chart', group: 'Organization' },
   { id: 'people', label: 'Go to People', icon: Users, href: '/dashboard/people', group: 'Navigation' },
   { id: 'attendance', label: 'Go to Attendance', icon: Clock, href: '/dashboard/attendance', group: 'Navigation' },
   { id: 'leave', label: 'Go to Leave', icon: CalendarOff, href: '/dashboard/leave', group: 'Navigation' },

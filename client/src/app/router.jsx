@@ -8,6 +8,10 @@ import ForgotPasswordPage from '@/pages/auth/ForgotPasswordPage';
 import ResetPasswordPage from '@/pages/auth/ResetPasswordPage';
 import VerifyEmailPage from '@/pages/auth/VerifyEmailPage';
 import DashboardPage from '@/pages/dashboard/DashboardPage';
+import DepartmentsPage from '@/pages/org/DepartmentsPage';
+import TeamsPage from '@/pages/org/TeamsPage';
+import DesignationsPage from '@/pages/org/DesignationsPage';
+import OrgChartPage from '@/pages/org/OrgChartPage';
 
 export const router = createBrowserRouter([
   // Root redirect
@@ -46,10 +50,14 @@ export const router = createBrowserRouter([
         element: <DashboardLayout />,
         children: [
           { path: '/dashboard', element: <DashboardPage /> },
-          // Future module pages will be added here:
+          // Organization Management
+          { path: '/dashboard/departments', element: <DepartmentsPage /> },
+          { path: '/dashboard/teams', element: <TeamsPage /> },
+          { path: '/dashboard/designations', element: <DesignationsPage /> },
+          { path: '/dashboard/org-chart', element: <OrgChartPage /> },
+          // Future module pages
           // { path: '/dashboard/people', element: <PeoplePage /> },
           // { path: '/dashboard/attendance', element: <AttendancePage /> },
-          // ...
         ],
       },
     ],
