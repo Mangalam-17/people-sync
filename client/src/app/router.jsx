@@ -12,6 +12,8 @@ import DepartmentsPage from '@/pages/org/DepartmentsPage';
 import TeamsPage from '@/pages/org/TeamsPage';
 import DesignationsPage from '@/pages/org/DesignationsPage';
 import OrgChartPage from '@/pages/org/OrgChartPage';
+import PeopleDirectory from '@/pages/people/PeopleDirectory';
+import EmployeeProfile from '@/pages/people/EmployeeProfile';
 
 export const router = createBrowserRouter([
   // Root redirect
@@ -55,8 +57,9 @@ export const router = createBrowserRouter([
           { path: '/dashboard/teams', element: <TeamsPage /> },
           { path: '/dashboard/designations', element: <DesignationsPage /> },
           { path: '/dashboard/org-chart', element: <OrgChartPage /> },
-          // Future module pages
-          // { path: '/dashboard/people', element: <PeoplePage /> },
+          // People Management
+          { path: '/dashboard/people', element: <PeopleDirectory /> },
+          { path: '/dashboard/people/:id', element: <EmployeeProfile /> },
           // { path: '/dashboard/attendance', element: <AttendancePage /> },
         ],
       },

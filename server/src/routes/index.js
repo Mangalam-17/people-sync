@@ -4,11 +4,13 @@ import userRoutes from './userRoutes.js';
 import departmentRoutes from './departmentRoutes.js';
 import teamRoutes from './teamRoutes.js';
 import designationRoutes from './designationRoutes.js';
+import employeeRoutes from './employeeRoutes.js';
 
 const router = Router();
 
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
+router.use('/employees', employeeRoutes);
 router.use('/departments', departmentRoutes);
 router.use('/teams', teamRoutes);
 router.use('/designations', designationRoutes);
