@@ -1,17 +1,21 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Eye, EyeOff, Loader2, ArrowRight, CheckCircle } from 'lucide-react';
+import { Eye, EyeOff, Loader2, ArrowRight, CheckCircle, Ticket } from 'lucide-react';
 import { useRegisterMutation } from '@/features/auth/authApi';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import toast from 'react-hot-toast';
+import axios from 'axios';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8001/api/v1';
 
 const registerSchema = z
   .object({
+    invitationCode: z.string().min(5, 'Invitation code is required'),
     companyName: z.string().min(2, 'Company name must be at least 2 characters').max(100),
     firstName: z.string().min(1, 'First name is required').max(50),
     lastName: z.string().min(1, 'Last name is required').max(50),
@@ -31,8 +35,11 @@ const registerSchema = z
   });
 
 const RegisterForm = () => {
+  const [searchParams] = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [inviteData, setInviteData] = useState(null);
+  const [validatingInvite, setValidatingInvite] = useState(false);
   const [registerMutation, { isLoading }] = useRegisterMutation();
 
   const {
@@ -40,9 +47,11 @@ const RegisterForm = () => {
     handleSubmit,
     formState: { errors },
     watch,
+    setValue,
   } = useForm({
     resolver: zodResolver(registerSchema),
     defaultValues: {
+      invitationCode: searchParams.get('invite') || '',
       companyName: '',
       firstName: '',
       lastName: '',
@@ -53,6 +62,47 @@ const RegisterForm = () => {
   });
 
   const password = watch('password', '');
+  const invitationCode = watch('invitationCode', '');
+
+  // Validate invitation code when it changes
+  useEffect(() => {
+    const validateInvite = async () => {
+      if (!invitationCode || invitationCode.length < 5) {
+        setInviteData(null);
+        return;
+      }
+
+      setValidatingInvite(true);
+      try {
+        const response = await axios.get(`${API_URL}/invitations/validate/${invitationCode}`);
+        const invitation = response.data.data.invitation;
+        
+        setInviteData(invitation);
+        
+        // Pre-fill form with invitation data
+        if (invitation.companyName) setValue('companyName', invitation.companyName);
+        if (invitation.email) setValue('email', invitation.email);
+        if (invitation.firstName) setValue('firstName', invitation.firstName);
+        if (invitation.lastName) setValue('lastName', invitation.lastName);
+        
+        toast.success('Invitation valid! Form pre-filled.');
+      } catch (error) {
+        setInviteData(null);
+        if (error.response?.data?.error?.code === 'INVITATION_NOT_FOUND') {
+          toast.error('Invalid invitation code');
+        } else if (error.response?.data?.error?.code === 'INVITATION_ALREADY_USED') {
+          toast.error('This invitation has already been used');
+        } else if (error.response?.data?.error?.code === 'INVITATION_EXPIRED') {
+          toast.error('This invitation has expired');
+        }
+      } finally {
+        setValidatingInvite(false);
+      }
+    };
+
+    const debounce = setTimeout(validateInvite, 500);
+    return () => clearTimeout(debounce);
+  }, [invitationCode, setValue]);
 
   const passwordChecks = [
     { label: '8+ characters', met: password.length >= 8 },
@@ -63,12 +113,19 @@ const RegisterForm = () => {
   ];
 
   const onSubmit = async (data) => {
+    const registerPromise = registerMutation(data).unwrap();
+
+    toast.promise(registerPromise, {
+      loading: 'Creating workspace...',
+      success: 'Workspace created successfully!',
+      error: (err) => err?.data?.error?.message || 'Registration failed. Please try again.',
+    });
+
     try {
-      await registerMutation(data).unwrap();
+      await registerPromise;
       setIsSuccess(true);
     } catch (error) {
-      const message = error?.data?.error?.message || 'Registration failed. Please try again.';
-      toast.error(message);
+      // Error handled by toast.promise
     }
   };
 
@@ -94,13 +151,6 @@ const RegisterForm = () => {
 
   return (
     <div>
-      <div className="flex items-center gap-2 mb-8 lg:hidden">
-        <div className="h-9 w-9 rounded-lg bg-primary flex items-center justify-center">
-          <span className="text-white font-bold text-sm">P</span>
-        </div>
-        <span className="text-lg font-semibold text-foreground tracking-tight">PeopleSync</span>
-      </div>
-
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-foreground tracking-tight">Create your workspace</h2>
         <p className="text-muted-foreground text-sm mt-1.5">
@@ -109,12 +159,43 @@ const RegisterForm = () => {
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-3.5">
+        {/* Invitation Code Field */}
+        <div className="space-y-1.5">
+          <Label htmlFor="invitationCode" className="flex items-center gap-2">
+            <Ticket className="h-4 w-4" />
+            Invitation Code
+          </Label>
+          <Input
+            id="invitationCode"
+            placeholder="INV-XXXXX-XXXXX"
+            className="font-mono uppercase"
+            {...register('invitationCode')}
+          />
+          {validatingInvite && (
+            <p className="text-xs text-muted-foreground flex items-center gap-1">
+              <Loader2 className="h-3 w-3 animate-spin" />
+              Validating invitation...
+            </p>
+          )}
+          {inviteData && (
+            <p className="text-xs text-success flex items-center gap-1">
+              <CheckCircle className="h-3 w-3" />
+              Valid invitation for {inviteData.companyName}
+            </p>
+          )}
+          {errors.invitationCode && (
+            <p className="text-xs text-destructive">{errors.invitationCode.message}</p>
+          )}
+        </div>
+
+        {/* Company Name */}
         <div className="space-y-1.5">
           <Label htmlFor="companyName">Company name</Label>
           <Input
             id="companyName"
             placeholder="Acme Inc"
             {...register('companyName')}
+            readOnly={inviteData?.companyName}
           />
           {errors.companyName && (
             <p className="text-xs text-destructive">{errors.companyName.message}</p>

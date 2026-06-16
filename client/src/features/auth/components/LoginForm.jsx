@@ -32,30 +32,28 @@ const LoginForm = () => {
   });
 
   const onSubmit = async (data) => {
+    const loginPromise = loginMutation(data).unwrap();
+
+    toast.promise(loginPromise, {
+      loading: 'Signing in...',
+      success: 'Welcome back!',
+      error: (err) => err?.data?.error?.message || 'Login failed. Please try again.',
+    });
+
     try {
-      const result = await loginMutation(data).unwrap();
+      const result = await loginPromise;
       login({
         accessToken: result.data.accessToken,
         user: result.data.user,
       });
-      toast.success('Welcome back!');
       navigate('/dashboard');
     } catch (error) {
-      const message = error?.data?.error?.message || 'Login failed. Please try again.';
-      toast.error(message);
+      // Error handled by toast.promise
     }
   };
 
   return (
     <div>
-      {/* Mobile logo */}
-      <div className="flex items-center gap-2 mb-8 lg:hidden">
-        <div className="h-9 w-9 rounded-lg bg-primary flex items-center justify-center">
-          <span className="text-white font-bold text-sm">P</span>
-        </div>
-        <span className="text-lg font-semibold text-foreground tracking-tight">PeopleSync</span>
-      </div>
-
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-foreground tracking-tight">Welcome back</h2>
         <p className="text-muted-foreground text-sm mt-1.5">

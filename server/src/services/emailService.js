@@ -58,6 +58,16 @@ class EmailService {
       <body style="margin:0;padding:0;background-color:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
         <div style="max-width:560px;margin:40px auto;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
           <div style="background:#0f172a;padding:32px;text-align:center;">
+            <!-- PeopleSync Logo -->
+            <div style="display:inline-block;width:48px;height:48px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border-radius:12px;margin-bottom:16px;position:relative;">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);">
+                <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.582a.5.5 0 0 1 0 .962L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" fill="white"/>
+                <path d="M20 3v4" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                <path d="M22 5h-4" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                <path d="M4 17v2" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                <path d="M5 18H3" stroke="white" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
             <h1 style="color:#ffffff;margin:0;font-size:24px;font-weight:700;letter-spacing:-0.5px;">PeopleSync</h1>
           </div>
           <div style="padding:32px;">
@@ -97,6 +107,16 @@ class EmailService {
       <body style="margin:0;padding:0;background-color:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
         <div style="max-width:560px;margin:40px auto;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
           <div style="background:#0f172a;padding:32px;text-align:center;">
+            <!-- PeopleSync Logo -->
+            <div style="display:inline-block;width:48px;height:48px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border-radius:12px;margin-bottom:16px;position:relative;">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);">
+                <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.582a.5.5 0 0 1 0 .962L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" fill="white"/>
+                <path d="M20 3v4" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                <path d="M22 5h-4" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                <path d="M4 17v2" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                <path d="M5 18H3" stroke="white" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
             <h1 style="color:#ffffff;margin:0;font-size:24px;font-weight:700;letter-spacing:-0.5px;">PeopleSync</h1>
           </div>
           <div style="padding:32px;">
@@ -136,6 +156,16 @@ class EmailService {
       <body style="margin:0;padding:0;background-color:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
         <div style="max-width:560px;margin:40px auto;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
           <div style="background:#0f172a;padding:32px;text-align:center;">
+            <!-- PeopleSync Logo -->
+            <div style="display:inline-block;width:48px;height:48px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border-radius:12px;margin-bottom:16px;position:relative;">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);">
+                <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.582a.5.5 0 0 1 0 .962L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z" fill="white"/>
+                <path d="M20 3v4" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                <path d="M22 5h-4" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                <path d="M4 17v2" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                <path d="M5 18H3" stroke="white" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
             <h1 style="color:#ffffff;margin:0;font-size:24px;font-weight:700;letter-spacing:-0.5px;">PeopleSync</h1>
           </div>
           <div style="padding:32px;">

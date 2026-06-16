@@ -23,8 +23,8 @@ const AuthLayout = () => {
           
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
-              <Sparkles className="h-5 w-5 text-primary-foreground" />
+            <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+              <Sparkles className="h-5 w-5 text-white" />
             </div>
             <span className="text-xl font-bold tracking-tight text-foreground">PeopleSync</span>
           </div>
@@ -60,10 +60,10 @@ const AuthLayout = () => {
           <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
 
           <div className="w-full max-w-md relative z-10">
-            {/* Mobile Logo */}
+            {/* Mobile Logo (only visible on smaller screens where left panel is hidden) */}
             <div className="flex lg:hidden items-center justify-center gap-3 mb-8">
-              <div className="h-10 w-10 rounded-2xl bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
-                <Sparkles className="h-5 w-5 text-primary-foreground" />
+              <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                <Sparkles className="h-5 w-5 text-white" />
               </div>
               <span className="text-xl font-bold tracking-tight text-foreground">PeopleSync</span>
             </div>

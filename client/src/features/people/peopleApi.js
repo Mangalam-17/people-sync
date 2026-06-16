@@ -1,6 +1,6 @@
-import { api } from '@/lib/api';
+import { apiSlice } from '@/store/api/apiSlice';
 
-export const peopleApi = api.injectEndpoints({
+export const peopleApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getEmployees: builder.query({
       query: (params) => ({
@@ -25,7 +25,7 @@ export const peopleApi = api.injectEndpoints({
       query: (data) => ({
         url: '/employees/onboard',
         method: 'POST',
-        data,
+        body: data,
       }),
       invalidatesTags: [{ type: 'Employee', id: 'LIST' }],
     }),

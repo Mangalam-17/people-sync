@@ -9,6 +9,11 @@ const passwordSchema = z
   .regex(/[^A-Za-z0-9]/, 'Password must contain at least one special character');
 
 export const registerSchema = z.object({
+  invitationCode: z
+    .string()
+    .min(5, 'Invitation code is required')
+    .trim()
+    .toUpperCase(),
   companyName: z
     .string()
     .min(2, 'Company name must be at least 2 characters')

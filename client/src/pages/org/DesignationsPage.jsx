@@ -11,6 +11,7 @@ import {
   useCreateDesignationMutation,
   useUpdateDesignationMutation,
   useDeleteDesignationMutation,
+  useGetAllDepartmentsQuery,
 } from '@/features/org/orgApi';
 import DataTable from '@/components/DataTable';
 import Modal from '@/components/ui/modal';
@@ -23,6 +24,7 @@ import { Badge } from '@/components/ui/badge';
 
 const designationSchema = z.object({
   title: z.string().min(1, 'Title is required').max(100),
+  departmentId: z.string().min(1, 'Department is required'),
   level: z.string().transform((v) => (v ? parseInt(v, 10) : 0)).pipe(z.number().min(0).max(20)),
   description: z.string().max(500).optional().or(z.literal('')),
 });
@@ -35,12 +37,15 @@ const DesignationsPage = () => {
   const [deleteTarget, setDeleteTarget] = useState(null);
 
   const { data: listData, isLoading } = useGetDesignationsQuery({ page, limit: 20, search });
+  const { data: deptData, isLoading: isLoadingDepts } = useGetAllDepartmentsQuery();
+  
   const [createDesignation, { isLoading: isCreating }] = useCreateDesignationMutation();
   const [updateDesignation, { isLoading: isUpdating }] = useUpdateDesignationMutation();
   const [deleteDesignation, { isLoading: isDeleting }] = useDeleteDesignationMutation();
 
   const designations = listData?.data || [];
   const pagination = listData?.pagination;
+  const departments = deptData?.data || [];
 
   const {
     register,
@@ -51,7 +56,7 @@ const DesignationsPage = () => {
 
   const openCreate = () => {
     setEditing(null);
-    reset({ title: '', level: '0', description: '' });
+    reset({ title: '', departmentId: '', level: '0', description: '' });
     setModalOpen(true);
   };
 
@@ -59,6 +64,7 @@ const DesignationsPage = () => {
     setEditing(item);
     reset({
       title: item.title,
+      departmentId: item.departmentId?._id || item.departmentId || '',
       level: String(item.level ?? 0),
       description: item.description || '',
     });
@@ -125,6 +131,15 @@ const DesignationsPage = () => {
       ),
     },
     {
+      key: 'department',
+      label: 'Department',
+      render: (row) => (
+        <span className="text-sm font-medium text-foreground">
+          {row.departmentId?.name || 'Unknown'}
+        </span>
+      ),
+    },
+    {
       key: 'level',
       label: 'Level',
       width: '100px',
@@ -178,7 +193,7 @@ const DesignationsPage = () => {
       >
         <div>
           <h1 className="text-2xl font-bold text-foreground tracking-tight">Designations</h1>
-          <p className="text-sm text-muted-foreground mt-1">Define job titles and seniority levels</p>
+          <p className="text-sm text-muted-foreground mt-1">Define job titles by department</p>
         </div>
         <Button onClick={openCreate}>
           <Plus className="h-4 w-4" /> Add Designation
@@ -197,7 +212,7 @@ const DesignationsPage = () => {
         searchPlaceholder="Search designations..."
         emptyIcon={Award}
         emptyTitle="No designations yet"
-        emptyDescription="Create designations like 'Software Engineer', 'Product Manager', etc."
+        emptyDescription="Create designations like 'Software Engineer' in Engineering."
         emptyAction="Add Designation"
         onEmptyAction={openCreate}
       />
@@ -210,6 +225,24 @@ const DesignationsPage = () => {
         description={editing ? 'Update designation details' : 'Add a new job title / designation'}
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="desig-dept">Department *</Label>
+            <select
+              id="desig-dept"
+              className="flex h-10 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring/20 disabled:opacity-50"
+              {...register('departmentId')}
+              disabled={isLoadingDepts}
+            >
+              <option value="">Select Department...</option>
+              {departments.map((dept) => (
+                <option key={dept._id} value={dept._id}>
+                  {dept.name}
+                </option>
+              ))}
+            </select>
+            {errors.departmentId && <p className="text-xs text-destructive">{errors.departmentId.message}</p>}
+          </div>
+
           <div className="grid grid-cols-3 gap-4">
             <div className="col-span-2 space-y-2">
               <Label htmlFor="desig-title">Title *</Label>

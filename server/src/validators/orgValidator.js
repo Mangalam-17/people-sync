@@ -34,12 +34,14 @@ export const updateTeamSchema = z.object({
 
 export const createDesignationSchema = z.object({
   title: z.string().min(1, 'Designation title is required').max(100).trim(),
+  departmentId: z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid department ID'),
   level: z.number().int().min(0).max(20).optional().default(0),
   description: z.string().max(500).trim().optional().nullable(),
 });
 
 export const updateDesignationSchema = z.object({
   title: z.string().min(1).max(100).trim().optional(),
+  departmentId: z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid department ID').optional(),
   level: z.number().int().min(0).max(20).optional(),
   description: z.string().max(500).trim().optional().nullable(),
   isActive: z.boolean().optional(),

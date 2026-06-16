@@ -2,6 +2,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { ProtectedRoute, PublicRoute } from '@/routes/guards';
 import AuthLayout from '@/layouts/AuthLayout';
 import DashboardLayout from '@/layouts/DashboardLayout';
+import LandingPage from '@/pages/LandingPage';
 import LoginPage from '@/pages/auth/LoginPage';
 import RegisterPage from '@/pages/auth/RegisterPage';
 import ForgotPasswordPage from '@/pages/auth/ForgotPasswordPage';
@@ -14,12 +15,15 @@ import DesignationsPage from '@/pages/org/DesignationsPage';
 import OrgChartPage from '@/pages/org/OrgChartPage';
 import PeopleDirectory from '@/pages/people/PeopleDirectory';
 import EmployeeProfile from '@/pages/people/EmployeeProfile';
+import AttendancePage from '@/pages/attendance/AttendancePage';
+import LeavesPage from '@/pages/leaves/LeavesPage';
+import LeaveApprovalsPage from '@/pages/leaves/LeaveApprovalsPage';
 
 export const router = createBrowserRouter([
-  // Root redirect
+  // Landing Page (Public)
   {
     path: '/',
-    element: <Navigate to="/login" replace />,
+    element: <LandingPage />,
   },
 
   // Public auth routes (redirect to dashboard if already logged in)
@@ -60,7 +64,10 @@ export const router = createBrowserRouter([
           // People Management
           { path: '/dashboard/people', element: <PeopleDirectory /> },
           { path: '/dashboard/people/:id', element: <EmployeeProfile /> },
-          // { path: '/dashboard/attendance', element: <AttendancePage /> },
+          // Attendance & Leaves
+          { path: '/dashboard/attendance', element: <AttendancePage /> },
+          { path: '/dashboard/leaves', element: <LeavesPage /> },
+          { path: '/dashboard/leave-approvals', element: <LeaveApprovalsPage /> },
         ],
       },
     ],

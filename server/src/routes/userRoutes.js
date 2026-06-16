@@ -1,66 +1,38 @@
-import { Router } from 'express';
+import express from 'express';
 import userController from '../controllers/userController.js';
 import authenticate from '../middlewares/authenticate.js';
-import { authorize } from '../middlewares/authorize.js';
-import { authorizeSelfOrRole } from '../middlewares/authorize.js';
+import { authorizeRole } from '../middlewares/authorize.js';
 import { validate, validateQuery } from '../middlewares/validate.js';
-import { PERMISSIONS, ROLES } from '../config/constants.js';
-import {
-  createUserSchema,
-  updateUserSchema,
-  changeRoleSchema,
-  listUsersQuerySchema,
-} from '../validators/userValidator.js';
+import { updateRoleSchema, listUsersQuerySchema } from '../validators/userValidator.js';
+import { ROLES } from '../config/constants.js';
 
-const router = Router();
+const router = express.Router();
 
 // All routes require authentication
 router.use(authenticate);
 
-// List users (HR Admin+)
+/**
+ * @route   GET /api/v1/users
+ * @desc    List all users (HR_ADMIN, SUPER_ADMIN only)
+ * @access  Private
+ */
 router.get(
   '/',
-  authorize(PERMISSIONS.USER_READ),
+  authorizeRole(ROLES.HR_ADMIN, ROLES.SUPER_ADMIN),
   validateQuery(listUsersQuerySchema),
   userController.list
 );
 
-// Get user by ID (Self or HR Admin+)
-router.get(
-  '/:id',
-  authorizeSelfOrRole(ROLES.SUPER_ADMIN, ROLES.HR_ADMIN),
-  userController.getById
-);
-
-// Create user (HR Admin+)
-router.post(
-  '/',
-  authorize(PERMISSIONS.USER_CREATE),
-  validate(createUserSchema),
-  userController.create
-);
-
-// Update user (Self limited fields, or HR Admin+ full)
+/**
+ * @route   PATCH /api/v1/users/:userId/role
+ * @desc    Update user role (HR_ADMIN, SUPER_ADMIN only)
+ * @access  Private
+ */
 router.patch(
-  '/:id',
-  authorizeSelfOrRole(ROLES.SUPER_ADMIN, ROLES.HR_ADMIN),
-  validate(updateUserSchema),
-  userController.update
-);
-
-// Change role (Super Admin only)
-router.patch(
-  '/:id/role',
-  authorize(PERMISSIONS.USER_MANAGE_ROLES),
-  validate(changeRoleSchema),
-  userController.changeRole
-);
-
-// Deactivate user (Super Admin only)
-router.delete(
-  '/:id',
-  authorize(PERMISSIONS.USER_DELETE),
-  userController.deactivate
+  '/:userId/role',
+  authorizeRole(ROLES.HR_ADMIN, ROLES.SUPER_ADMIN),
+  validate(updateRoleSchema),
+  userController.updateRole
 );
 
 export default router;

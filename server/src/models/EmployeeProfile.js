@@ -50,14 +50,6 @@ const employeeProfileSchema = new mongoose.Schema(
       type: Date,
       required: [true, 'Joining date is required'],
     },
-    baseSalary: {
-      type: Number,
-      default: 0,
-    },
-    currency: {
-      type: String,
-      default: 'USD',
-    },
     emergencyContact: {
       type: emergencyContactSchema,
       default: null,

@@ -13,7 +13,6 @@ export const onboardEmployeeSchema = z.object({
   
   employmentType: z.enum(['FULL_TIME', 'PART_TIME', 'CONTRACT', 'INTERN']).default('FULL_TIME'),
   joiningDate: z.string().datetime({ message: 'Invalid joining date' }),
-  baseSalary: z.number().min(0).default(0),
 });
 
 export const updateEmployeeSchema = z.object({
@@ -22,7 +21,6 @@ export const updateEmployeeSchema = z.object({
   designationId: z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid ID').optional(),
   employmentType: z.enum(['FULL_TIME', 'PART_TIME', 'CONTRACT', 'INTERN']).optional(),
   status: z.enum(['ACTIVE', 'ON_LEAVE', 'TERMINATED', 'RESIGNED']).optional(),
-  baseSalary: z.number().min(0).optional(),
 });
 
 export const listEmployeesQuerySchema = z.object({

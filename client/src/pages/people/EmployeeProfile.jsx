@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Mail, Phone, Building2, MapPin, Award, Calendar, DollarSign, Clock } from 'lucide-react';
+import { ArrowLeft, Mail, Phone, Building2, MapPin, Award, Calendar, DollarSign, Clock, User } from 'lucide-react';
 import { useGetEmployeeByIdQuery } from '@/features/people/peopleApi';
 import { Badge } from '@/components/ui/badge';
 
@@ -39,11 +39,7 @@ const EmployeeProfile = () => {
         <div className="relative z-10 flex flex-col md:flex-row items-center md:items-start gap-8">
           {/* Huge Avatar */}
           <div className="h-32 w-32 rounded-[2rem] bg-primary/10 flex items-center justify-center text-primary font-bold text-4xl shadow-organic border border-primary/20 shrink-0">
-            {user?.avatar ? (
-              <img src={user.avatar} alt="avatar" className="h-full w-full rounded-[2rem] object-cover" />
-            ) : (
-              `${user?.firstName?.[0] || ''}${user?.lastName?.[0] || ''}`
-            )}
+            <User className="h-16 w-16" />
           </div>
 
           <div className="flex-1 text-center md:text-left space-y-4">

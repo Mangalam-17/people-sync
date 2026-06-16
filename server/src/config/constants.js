@@ -5,6 +5,7 @@
 // --- Roles ---
 export const ROLES = {
   SUPER_ADMIN: 'super_admin',
+  ADMIN: 'admin',
   HR_ADMIN: 'hr_admin',
   MANAGER: 'manager',
   EMPLOYEE: 'employee',
@@ -12,6 +13,7 @@ export const ROLES = {
 
 export const ROLE_HIERARCHY = [
   ROLES.SUPER_ADMIN,
+  ROLES.ADMIN,
   ROLES.HR_ADMIN,
   ROLES.MANAGER,
   ROLES.EMPLOYEE,
@@ -79,8 +81,69 @@ export const PERMISSIONS = {
 
 // Default permissions per role
 export const ROLE_PERMISSIONS = {
+  // SUPER_ADMIN: Tenant owner, full system access, NOT an employee
   [ROLES.SUPER_ADMIN]: Object.values(PERMISSIONS),
 
+  // ADMIN: Operations lead, IS an employee, manages company operations
+  [ROLES.ADMIN]: [
+    // Employee Management
+    PERMISSIONS.USER_CREATE,
+    PERMISSIONS.USER_READ,
+    PERMISSIONS.USER_UPDATE,
+    PERMISSIONS.USER_DELETE,
+    
+    // Organization Management
+    PERMISSIONS.ORG_MANAGE,
+    PERMISSIONS.DEPARTMENT_MANAGE,
+    PERMISSIONS.TEAM_MANAGE,
+    PERMISSIONS.DESIGNATION_MANAGE,
+    
+    // Attendance (Full Access + Can Mark Own)
+    PERMISSIONS.ATTENDANCE_READ,
+    PERMISSIONS.ATTENDANCE_READ_ALL,
+    PERMISSIONS.ATTENDANCE_MANAGE,
+    
+    // Leave Management (Full Access + Can Request Own)
+    PERMISSIONS.LEAVE_REQUEST,
+    PERMISSIONS.LEAVE_APPROVE,
+    PERMISSIONS.LEAVE_MANAGE,
+    
+    // Payroll
+    PERMISSIONS.PAYROLL_READ,
+    PERMISSIONS.PAYROLL_MANAGE,
+    
+    // Tasks
+    PERMISSIONS.TASK_CREATE,
+    PERMISSIONS.TASK_READ,
+    PERMISSIONS.TASK_MANAGE,
+    
+    // Announcements
+    PERMISSIONS.ANNOUNCEMENT_CREATE,
+    PERMISSIONS.ANNOUNCEMENT_READ,
+    
+    // Recruitment
+    PERMISSIONS.RECRUITMENT_MANAGE,
+    
+    // Performance
+    PERMISSIONS.PERFORMANCE_READ,
+    PERMISSIONS.PERFORMANCE_MANAGE,
+    
+    // Assets
+    PERMISSIONS.ASSET_READ,
+    PERMISSIONS.ASSET_MANAGE,
+    
+    // Reports
+    PERMISSIONS.REPORT_VIEW,
+    PERMISSIONS.REPORT_EXPORT,
+    
+    // Audit
+    PERMISSIONS.AUDIT_READ,
+    
+    // Settings (Can configure system except billing)
+    PERMISSIONS.SETTINGS_MANAGE,
+  ],
+
+  // HR_ADMIN: HR specialist, IS an employee, focuses on people operations
   [ROLES.HR_ADMIN]: [
     PERMISSIONS.USER_CREATE,
     PERMISSIONS.USER_READ,
@@ -90,8 +153,10 @@ export const ROLE_PERMISSIONS = {
     PERMISSIONS.DEPARTMENT_MANAGE,
     PERMISSIONS.TEAM_MANAGE,
     PERMISSIONS.DESIGNATION_MANAGE,
+    PERMISSIONS.ATTENDANCE_READ,
     PERMISSIONS.ATTENDANCE_READ_ALL,
     PERMISSIONS.ATTENDANCE_MANAGE,
+    PERMISSIONS.LEAVE_REQUEST,
     PERMISSIONS.LEAVE_APPROVE,
     PERMISSIONS.LEAVE_MANAGE,
     PERMISSIONS.PAYROLL_READ,
@@ -111,12 +176,13 @@ export const ROLE_PERMISSIONS = {
     PERMISSIONS.AUDIT_READ,
   ],
 
+  // MANAGER: Team lead, IS an employee, manages team
   [ROLES.MANAGER]: [
     PERMISSIONS.USER_READ,
     PERMISSIONS.ATTENDANCE_READ,
-    PERMISSIONS.ATTENDANCE_READ_ALL,
-    PERMISSIONS.LEAVE_APPROVE,
-    PERMISSIONS.LEAVE_REQUEST,
+    PERMISSIONS.ATTENDANCE_READ_ALL, // Can view team attendance
+    PERMISSIONS.LEAVE_REQUEST, // Can request own leave
+    PERMISSIONS.LEAVE_APPROVE, // Can approve team leaves
     PERMISSIONS.TASK_CREATE,
     PERMISSIONS.TASK_READ,
     PERMISSIONS.TASK_MANAGE,
@@ -126,10 +192,11 @@ export const ROLE_PERMISSIONS = {
     PERMISSIONS.REPORT_VIEW,
   ],
 
+  // EMPLOYEE: Regular staff, marks attendance, requests leaves
   [ROLES.EMPLOYEE]: [
     PERMISSIONS.USER_READ,
-    PERMISSIONS.ATTENDANCE_READ,
-    PERMISSIONS.LEAVE_REQUEST,
+    PERMISSIONS.ATTENDANCE_READ, // Can view own attendance
+    PERMISSIONS.LEAVE_REQUEST, // Can request leave
     PERMISSIONS.TASK_READ,
     PERMISSIONS.ANNOUNCEMENT_READ,
     PERMISSIONS.PERFORMANCE_READ,

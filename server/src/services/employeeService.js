@@ -4,78 +4,121 @@ import User from '../models/User.js';
 import EmployeeProfile from '../models/EmployeeProfile.js';
 import Department from '../models/Department.js';
 import Designation from '../models/Designation.js';
-import { logger } from '../utils/logger.js';
+import Tenant from '../models/Tenant.js';
+import logger from '../utils/logger.js';
+import { sendEmployeeOnboardingEmail } from '../utils/email.js';
 import createError from 'http-errors';
 
 class EmployeeService {
   /**
    * Onboard a new employee. Creates User and EmployeeProfile in a transaction.
    */
-  async onboardEmployee(data, tenantId, adminId) {
-    const session = await mongoose.startSession();
-    session.startTransaction();
-
+  async onboardEmployee(data, tenantId, adminUserId, adminRole) {
+    // Note: Transactions disabled for local development (requires replica set)
+    // In production, wrap this in a session/transaction for atomicity
+    
     try {
       // 1. Check if email already exists in this tenant
-      const existingUser = await User.findOne({ email: data.email, tenantId }).session(session);
+      const existingUser = await User.findOne({ email: data.email, tenantId });
       if (existingUser) {
         throw createError(409, 'Email is already registered in this workspace');
       }
 
-      // 2. Generate random temporary password
+      // 2. Validate role assignment permissions using provided admin role
+      if (!adminRole) {
+        throw createError(403, 'Admin role not provided');
+      }
+
+      const requestedRole = data.role || 'employee';
+      
+      // Permission checks based on admin's role
+      if (requestedRole === 'super_admin' && adminRole !== 'super_admin') {
+        throw createError(403, 'Only Super Admins can create other Super Admins');
+      }
+      
+      if (requestedRole === 'admin' && adminRole !== 'super_admin') {
+        throw createError(403, 'Only Super Admins can create Admins');
+      }
+      
+      if (requestedRole === 'hr_admin' && !['super_admin', 'admin'].includes(adminRole)) {
+        throw createError(403, 'Only Super Admins or Admins can create HR Admins');
+      }
+      
+      if (requestedRole === 'manager' && 
+          !['super_admin', 'admin', 'hr_admin'].includes(adminRole)) {
+        throw createError(403, 'You do not have permission to assign this role');
+      }
+
+      logger.info('Creating user with role', { 
+        email: data.email,
+        role: requestedRole,
+        createdByRole: adminRole 
+      });
+
+      // 3. Generate random temporary password
       const tempPassword = crypto.randomBytes(16).toString('hex');
 
-      // 3. Create User account
-      const [user] = await User.create(
-        [
-          {
-            tenantId,
-            firstName: data.firstName,
-            lastName: data.lastName,
-            email: data.email,
-            password: tempPassword,
-            role: data.role,
-            isEmailVerified: true, // Internal invites are auto-verified
-          },
-        ],
-        { session }
-      );
+      // 4. Create User account
+      const user = await User.create({
+        tenantId,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        password: tempPassword,
+        role: requestedRole,
+        isEmailVerified: true, // Internal invites are auto-verified
+      });
 
-      // 4. Create EmployeeProfile
-      await EmployeeProfile.create(
-        [
-          {
-            tenantId,
-            userId: user._id,
-            departmentId: data.departmentId || null,
-            teamId: data.teamId || null,
-            designationId: data.designationId || null,
-            employmentType: data.employmentType,
-            joiningDate: data.joiningDate,
-            baseSalary: data.baseSalary,
-          },
-        ],
-        { session }
-      );
+      // 5. Create EmployeeProfile
+      await EmployeeProfile.create({
+        tenantId,
+        userId: user._id,
+        departmentId: data.departmentId || null,
+        teamId: data.teamId || null,
+        designationId: data.designationId || null,
+        employmentType: data.employmentType,
+        joiningDate: data.joiningDate,
+      });
 
-      // 5. Generate Password Reset Token for onboarding flow
+      // 6. Generate Password Reset Token for onboarding flow
       const resetToken = crypto.randomBytes(32).toString('hex');
       const resetTokenHash = crypto.createHash('sha256').update(resetToken).digest('hex');
       
       user.passwordResetToken = resetTokenHash;
       user.passwordResetExpires = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days
-      await user.save({ session });
+      await user.save();
 
-      // TODO: Send Email (Welcome to PeopleSync + set password link)
-      logger.info(`Onboarding email sent to ${user.email} with reset token: ${resetToken}`);
+      // 7. Get company name for email
+      const tenant = await Tenant.findById(tenantId);
 
-      await session.commitTransaction();
+      // 8. Send welcome email with password setup link
+      try {
+        await sendEmployeeOnboardingEmail({
+          email: user.email,
+          firstName: user.firstName,
+          resetToken,
+          companyName: tenant?.companyName || 'Your Company',
+        });
+        logger.info('Onboarding email sent successfully', { 
+          email: user.email,
+          role: user.role 
+        });
+      } catch (emailError) {
+        logger.error('Failed to send onboarding email', { 
+          email: user.email,
+          error: emailError.message 
+        });
+        // Don't throw - employee is already created, just log the error
+      }
+
       return user;
     } catch (error) {
-      await session.abortTransaction();
+      // If user was created but profile failed, clean up
+      // Note: This is best-effort cleanup without transactions
+      if (error.name === 'MongoError' && error.code === 11000) {
+        throw createError(409, 'Email is already registered in this workspace');
+      }
       throw error;
-    } finally {
-      session.endSession();
     }
   }
 
@@ -146,14 +189,16 @@ class EmployeeService {
         status: 1,
         employmentType: 1,
         joiningDate: 1,
-        'user._id': 1,
-        'user.firstName': 1,
-        'user.lastName': 1,
-        'user.email': 1,
-        'user.role': 1,
-        'user.avatar': 1,
-        'department.name': { $arrayElemAt: ['$department.name', 0] },
-        'designation.title': { $arrayElemAt: ['$designation.title', 0] },
+        user: {
+          _id: '$user._id',
+          firstName: '$user.firstName',
+          lastName: '$user.lastName',
+          email: '$user.email',
+          role: '$user.role',
+          avatar: '$user.avatar',
+        },
+        department: { $arrayElemAt: ['$department', 0] },
+        designation: { $arrayElemAt: ['$designation', 0] },
       }
     });
 

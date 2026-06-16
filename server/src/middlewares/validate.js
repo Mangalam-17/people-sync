@@ -5,9 +5,11 @@ import { errorResponse } from '../utils/responseFormatter.js';
  * Validates `req.body` against the provided schema.
  */
 export const validate = (schema) => (req, res, next) => {
+  console.log('Validating request body:', JSON.stringify(req.body, null, 2));
   const result = schema.safeParse(req.body);
 
   if (!result.success) {
+    console.log('Validation failed:', result.error.errors);
     const errors = result.error.errors.map((err) => ({
       field: err.path.join('.'),
       message: err.message,

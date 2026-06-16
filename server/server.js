@@ -10,17 +10,18 @@ const startServer = async () => {
 
     // Start Express server
     const server = app.listen(env.PORT, () => {
-      logger.info(`
-  ╔═══════════════════════════════════════════════╗
-  ║                                               ║
-  ║   🚀  PeopleSync API Server                   ║
-  ║                                               ║
-  ║   Port:    ${String(env.PORT).padEnd(35)}║
-  ║   Mode:    ${String(env.NODE_ENV).padEnd(35)}║
-  ║   Health:  http://localhost:${env.PORT}/api/v1/health   ║
-  ║                                               ║
-  ╚═══════════════════════════════════════════════╝
-      `);
+      // Beautiful startup banner
+      console.log('\n');
+      logger.info('═══════════════════════════════════════════════');
+      logger.info('');
+      logger.info('   🚀  PeopleSync API Server');
+      logger.info('');
+      logger.info(`   Port:        ${env.PORT}`);
+      logger.info(`   Environment: ${env.NODE_ENV}`);
+      logger.info(`   Health:      http://localhost:${env.PORT}/api/v1/health`);
+      logger.info('');
+      logger.info('═══════════════════════════════════════════════');
+      console.log('\n');
     });
 
     // Graceful shutdown

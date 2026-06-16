@@ -7,6 +7,7 @@ import env from './src/config/env.js';
 import routes from './src/routes/index.js';
 import errorHandler from './src/middlewares/errorHandler.js';
 import { apiLimiter } from './src/middlewares/rateLimiter.js';
+import logger from './src/utils/logger.js';
 
 const app = express();
 
@@ -24,11 +25,27 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
-// --- Logging ---
+// --- HTTP Request Logging (Morgan + Winston) ---
 if (env.NODE_ENV === 'development') {
-  app.use(morgan('dev'));
+  // Custom Morgan format for development with colors and emojis
+  morgan.token('status-emoji', (req, res) => {
+    const status = res.statusCode;
+    if (status >= 500) return '💥';
+    if (status >= 400) return '⚠️';
+    if (status >= 300) return '🔄';
+    if (status >= 200) return '✅';
+    return '📡';
+  });
+
+  app.use(
+    morgan(
+      ':status-emoji :method :url :status :response-time ms - :res[content-length]',
+      { stream: logger.stream }
+    )
+  );
 } else {
-  app.use(morgan('combined'));
+  // Production: Standard combined format
+  app.use(morgan('combined', { stream: logger.stream }));
 }
 
 // --- Rate Limiting ---
@@ -39,6 +56,7 @@ app.use('/api/v1', routes);
 
 // --- 404 ---
 app.use((req, res) => {
+  logger.warn(`404 Not Found: ${req.method} ${req.originalUrl}`);
   res.status(404).json({
     success: false,
     error: {

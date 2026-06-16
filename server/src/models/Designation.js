@@ -8,6 +8,12 @@ const designationSchema = new mongoose.Schema(
       required: [true, 'Tenant ID is required'],
       index: true,
     },
+    departmentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Department',
+      required: [true, 'Department ID is required'],
+      index: true,
+    },
     title: {
       type: String,
       required: [true, 'Designation title is required'],
@@ -38,8 +44,8 @@ const designationSchema = new mongoose.Schema(
   }
 );
 
-// Compound unique: title unique within a tenant
-designationSchema.index({ tenantId: 1, title: 1 }, { unique: true });
+// Compound unique: title unique within a department in a tenant
+designationSchema.index({ tenantId: 1, departmentId: 1, title: 1 }, { unique: true });
 designationSchema.index({ tenantId: 1, isActive: 1 });
 designationSchema.index({ tenantId: 1, level: 1 });
 

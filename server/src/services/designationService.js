@@ -1,4 +1,5 @@
 import designationRepository from '../repositories/designationRepository.js';
+import departmentRepository from '../repositories/departmentRepository.js';
 import auditService from './auditService.js';
 import AppError from '../utils/AppError.js';
 
@@ -20,9 +21,17 @@ class DesignationService {
   }
 
   async create(tenantId, data, requestingUser, { ipAddress, userAgent }) {
-    const titleExists = await designationRepository.titleExistsInTenant(tenantId, data.title);
+    if (!data.departmentId) {
+      throw AppError.badRequest('Department ID is required');
+    }
+    const department = await departmentRepository.findById(data.departmentId);
+    if (!department || department.tenantId.toString() !== tenantId.toString()) {
+      throw AppError.notFound('Department not found');
+    }
+
+    const titleExists = await designationRepository.titleExistsInDepartment(tenantId, data.departmentId, data.title);
     if (titleExists) {
-      throw AppError.conflict('A designation with this title already exists');
+      throw AppError.conflict('A designation with this title already exists in this department');
     }
 
     const designation = await designationRepository.create({ tenantId, ...data });
@@ -33,7 +42,7 @@ class DesignationService {
       action: 'designation.created',
       resource: 'Designation',
       resourceId: designation._id,
-      details: { title: data.title, level: data.level },
+      details: { title: data.title, level: data.level, departmentId: data.departmentId },
       ipAddress,
       userAgent,
     });
@@ -47,10 +56,20 @@ class DesignationService {
       throw AppError.notFound('Designation not found');
     }
 
-    if (data.title && data.title !== designation.title) {
-      const titleExists = await designationRepository.titleExistsInTenant(tenantId, data.title, id);
+    if (data.departmentId && data.departmentId !== designation.departmentId.toString()) {
+      const department = await departmentRepository.findById(data.departmentId);
+      if (!department || department.tenantId.toString() !== tenantId.toString()) {
+        throw AppError.notFound('Department not found');
+      }
+    }
+
+    const targetDepartmentId = data.departmentId || designation.departmentId;
+    const targetTitle = data.title || designation.title;
+
+    if (data.title || data.departmentId) {
+      const titleExists = await designationRepository.titleExistsInDepartment(tenantId, targetDepartmentId, targetTitle, id);
       if (titleExists) {
-        throw AppError.conflict('A designation with this title already exists');
+        throw AppError.conflict('A designation with this title already exists in this department');
       }
     }
 

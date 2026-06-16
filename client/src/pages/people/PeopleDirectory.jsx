@@ -1,30 +1,50 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Search, Building2, Award, Calendar } from 'lucide-react';
+import { Plus, Search, Building2, Award, Calendar, Shield, Edit2, User } from 'lucide-react';
 import { useGetEmployeesQuery } from '@/features/people/peopleApi';
-import { DataTable } from '@/components/ui/DataTable';
+import DataTable from '@/components/DataTable';
 import { Badge } from '@/components/ui/badge';
 import { OnboardEmployeeModal } from '@/features/people/components/OnboardEmployeeModal';
+import { EditRoleModal } from '@/features/users/EditRoleModal';
+import { selectCurrentUser } from '@/features/auth/authSlice';
+import { useSelector } from 'react-redux';
+
+// Role badge colors
+const ROLE_COLORS = {
+  employee: 'bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400',
+  manager: 'bg-purple-100 text-purple-700 dark:bg-purple-900/20 dark:text-purple-400',
+  hr_admin: 'bg-orange-100 text-orange-700 dark:bg-orange-900/20 dark:text-orange-400',
+  super_admin: 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400',
+};
+
+const ROLE_LABELS = {
+  employee: 'Employee',
+  manager: 'Manager',
+  hr_admin: 'HR Admin',
+  super_admin: 'Super Admin',
+};
 
 const PeopleDirectory = () => {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editRoleUser, setEditRoleUser] = useState(null);
   const navigate = useNavigate();
+  const currentUser = useSelector(selectCurrentUser);
 
   const { data, isLoading } = useGetEmployeesQuery({ page, limit: 10, search });
 
+  // Check if current user can edit roles
+  const canEditRoles = ['super_admin', 'hr_admin'].includes(currentUser?.role);
+
   const columns = [
     {
-      header: 'Employee',
-      accessor: (row) => (
+      key: 'employee',
+      label: 'Employee',
+      render: (row) => (
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold shadow-sm">
-            {row.user?.avatar ? (
-              <img src={row.user.avatar} alt="avatar" className="h-full w-full rounded-full object-cover" />
-            ) : (
-              `${row.user?.firstName?.[0] || ''}${row.user?.lastName?.[0] || ''}`
-            )}
+            <User className="h-5 w-5" />
           </div>
           <div>
             <p className="font-bold text-foreground">
@@ -36,8 +56,30 @@ const PeopleDirectory = () => {
       ),
     },
     {
-      header: 'Role & Department',
-      accessor: (row) => (
+      key: 'role',
+      label: 'System Role',
+      render: (row) => (
+        <div className="flex items-center gap-2">
+          <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${ROLE_COLORS[row.user?.role] || ROLE_COLORS.employee}`}>
+            <Shield className="h-3 w-3" />
+            {ROLE_LABELS[row.user?.role] || 'Employee'}
+          </div>
+          {canEditRoles && (
+            <button
+              onClick={() => setEditRoleUser(row.user)}
+              className="p-1.5 rounded-lg hover:bg-accent transition-colors"
+              title="Edit role"
+            >
+              <Edit2 className="h-3.5 w-3.5 text-muted-foreground hover:text-primary" />
+            </button>
+          )}
+        </div>
+      ),
+    },
+    {
+      key: 'department',
+      label: 'Department & Title',
+      render: (row) => (
         <div>
           <p className="font-bold text-foreground flex items-center gap-1.5">
             <Award className="h-3.5 w-3.5 text-indigo-500" />
@@ -51,8 +93,9 @@ const PeopleDirectory = () => {
       ),
     },
     {
-      header: 'Employment',
-      accessor: (row) => (
+      key: 'employment',
+      label: 'Employment',
+      render: (row) => (
         <div>
           <Badge variant={row.employmentType === 'FULL_TIME' ? 'success' : 'secondary'}>
             {row.employmentType?.replace('_', ' ')}
@@ -65,8 +108,9 @@ const PeopleDirectory = () => {
       ),
     },
     {
-      header: 'Status',
-      accessor: (row) => (
+      key: 'status',
+      label: 'Status',
+      render: (row) => (
         <Badge
           variant={
             row.status === 'ACTIVE'
@@ -113,13 +157,18 @@ const PeopleDirectory = () => {
           isLoading={isLoading}
           pagination={data?.data?.pagination}
           onPageChange={setPage}
-          onSearch={setSearch}
+          searchValue={search}
+          onSearchChange={setSearch}
           searchPlaceholder="Search employees by name or email..."
-          onRowClick={(row) => navigate(`/dashboard/people/${row._id}`)}
         />
       </div>
 
       <OnboardEmployeeModal open={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <EditRoleModal 
+        open={!!editRoleUser} 
+        onClose={() => setEditRoleUser(null)} 
+        user={editRoleUser}
+      />
     </div>
   );
 };

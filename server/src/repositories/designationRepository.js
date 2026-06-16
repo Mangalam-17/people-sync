@@ -19,7 +19,7 @@ class DesignationRepository {
 
     const skip = (page - 1) * limit;
     const [designations, total] = await Promise.all([
-      Designation.find(filter).sort({ level: 1, title: 1 }).skip(skip).limit(limit),
+      Designation.find(filter).sort({ level: 1, title: 1 }).skip(skip).limit(limit).populate('departmentId', 'name'),
       Designation.countDocuments(filter),
     ]);
 
@@ -27,7 +27,7 @@ class DesignationRepository {
   }
 
   async findAllByTenant(tenantId, isActive = true) {
-    return Designation.find({ tenantId, isActive }).sort({ level: 1, title: 1 });
+    return Designation.find({ tenantId, isActive }).sort({ level: 1, title: 1 }).populate('departmentId', 'name');
   }
 
   async update(id, data) {
@@ -38,8 +38,8 @@ class DesignationRepository {
     return Designation.findByIdAndDelete(id);
   }
 
-  async titleExistsInTenant(tenantId, title, excludeId = null) {
-    const filter = { tenantId, title: { $regex: new RegExp(`^${title}$`, 'i') } };
+  async titleExistsInDepartment(tenantId, departmentId, title, excludeId = null) {
+    const filter = { tenantId, departmentId, title: { $regex: new RegExp(`^${title}$`, 'i') } };
     if (excludeId) filter._id = { $ne: excludeId };
     const count = await Designation.countDocuments(filter);
     return count > 0;

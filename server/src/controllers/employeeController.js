@@ -1,37 +1,63 @@
-import { asyncHandler } from '../utils/asyncHandler.js';
 import employeeService from '../services/employeeService.js';
-import { sendResponse } from '../utils/response.js';
+import { successResponse, createdResponse, paginatedResponse } from '../utils/responseFormatter.js';
+import logger from '../utils/logger.js';
 
 class EmployeeController {
-  onboard = asyncHandler(async (req, res) => {
-    const user = await employeeService.onboardEmployee(
-      req.body,
-      req.user.tenantId,
-      req.user.id
-    );
+  async onboard(req, res, next) {
+    try {
+      logger.info('Onboarding new employee', { 
+        email: req.body.email,
+        tenantId: req.user.tenantId 
+      });
 
-    sendResponse(res, 201, 'Employee onboarded successfully. Invite sent.', {
-      employee: { id: user._id, email: user.email },
-    });
-  });
+      const user = await employeeService.onboardEmployee(
+        req.body,
+        req.user.tenantId,
+        req.user.userId, // Fixed: was req.user.id, should be req.user.userId
+        req.user.role    // Pass admin role for validation
+      );
 
-  list = asyncHandler(async (req, res) => {
-    const result = await employeeService.listEmployees({
-      tenantId: req.user.tenantId,
-      ...req.query,
-    });
+      logger.info('Employee onboarded successfully', { 
+        employeeId: user._id,
+        email: user.email 
+      });
 
-    sendResponse(res, 200, 'Employees retrieved successfully', result);
-  });
+      return createdResponse(res, { employee: { id: user._id, email: user.email } }, 'Employee onboarded successfully. Invite sent.');
+    } catch (error) {
+      logger.error('Failed to onboard employee', { 
+        email: req.body.email,
+        error: error.message,
+        tenantId: req.user.tenantId
+      });
+      next(error);
+    }
+  }
 
-  getById = asyncHandler(async (req, res) => {
-    const employee = await employeeService.getEmployeeById(
-      req.user.tenantId,
-      req.params.id
-    );
+  async list(req, res, next) {
+    try {
+      const result = await employeeService.listEmployees({
+        tenantId: req.user.tenantId,
+        ...req.query,
+      });
 
-    sendResponse(res, 200, 'Employee retrieved successfully', { employee });
-  });
+      return successResponse(res, result, 'Employees retrieved successfully');
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getById(req, res, next) {
+    try {
+      const employee = await employeeService.getEmployeeById(
+        req.user.tenantId,
+        req.params.id
+      );
+
+      return successResponse(res, { employee }, 'Employee retrieved successfully');
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export default new EmployeeController();

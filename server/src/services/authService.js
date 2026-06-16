@@ -4,6 +4,7 @@ import tenantRepository from '../repositories/tenantRepository.js';
 import refreshTokenRepository from '../repositories/refreshTokenRepository.js';
 import auditService from './auditService.js';
 import emailService from './emailService.js';
+import invitationService from './invitationService.js';
 import { ROLES, ROLE_PERMISSIONS, AUTH, AUDIT_ACTIONS } from '../config/constants.js';
 import {
   generateAccessToken,
@@ -19,21 +20,43 @@ import env from '../config/env.js';
 class AuthService {
   /**
    * Register a new tenant and its super admin user.
-   * Self-service: first user creates the tenant.
+   * Requires valid invitation code.
    */
-  async register({ companyName, firstName, lastName, email, password }, { ipAddress, userAgent }) {
+  async register({ invitationCode, companyName, firstName, lastName, email, password }, { ipAddress, userAgent }) {
+    // Validate invitation code (REQUIRED)
+    if (!invitationCode) {
+      throw AppError.badRequest(
+        'Invitation code is required. Please contact your administrator to get an invitation.',
+        'INVITATION_REQUIRED'
+      );
+    }
+
+    const invitation = await invitationService.validateInvitation(invitationCode);
+
+    // Verify email matches invitation
+    if (invitation.email.toLowerCase() !== email.toLowerCase()) {
+      throw AppError.badRequest(
+        'Email does not match the invitation. Please use the email address that received the invitation.',
+        'EMAIL_MISMATCH'
+      );
+    }
+
     // Check if email is already used across any tenant
     const existingUser = await userRepository.findByEmailAcrossTenants(email);
     if (existingUser) {
       throw AppError.conflict('An account with this email already exists', 'AUTH_EMAIL_EXISTS');
     }
 
+    // Use invitation company name if not provided
+    const finalCompanyName = companyName || invitation.companyName;
+
     // Create tenant
-    const slug = await tenantRepository.generateUniqueSlug(companyName);
+    const slug = await tenantRepository.generateUniqueSlug(finalCompanyName);
     const tenant = await tenantRepository.create({
-      name: companyName,
+      name: finalCompanyName,
       slug,
-      plan: 'free',
+      plan: invitation.plan || 'free',
+      maxUsers: invitation.maxUsers,
     });
 
     // Generate email verification token
@@ -42,8 +65,8 @@ class AuthService {
     // Create super admin user
     const user = await userRepository.create({
       tenantId: tenant._id,
-      firstName,
-      lastName,
+      firstName: firstName || invitation.firstName,
+      lastName: lastName || invitation.lastName,
       email,
       password,
       role: ROLES.SUPER_ADMIN,
@@ -56,9 +79,12 @@ class AuthService {
     // Update tenant with owner
     await tenantRepository.update(tenant._id, { ownerId: user._id });
 
+    // Mark invitation as used
+    await invitationService.useInvitation(invitationCode, user._id, tenant._id);
+
     // Send verification email
     const verificationUrl = `${env.CLIENT_URL}/verify-email/${verificationToken}`;
-    await emailService.sendVerificationEmail(email, firstName, verificationUrl);
+    await emailService.sendVerificationEmail(email, firstName || invitation.firstName, verificationUrl);
 
     // Audit log
     await auditService.log({
@@ -67,7 +93,7 @@ class AuthService {
       action: AUDIT_ACTIONS.AUTH_REGISTER,
       resource: 'User',
       resourceId: user._id,
-      details: { companyName, email },
+      details: { companyName: finalCompanyName, email, invitationCode },
       ipAddress,
       userAgent,
     });
@@ -78,7 +104,7 @@ class AuthService {
       action: AUDIT_ACTIONS.TENANT_CREATED,
       resource: 'Tenant',
       resourceId: tenant._id,
-      details: { name: companyName, slug },
+      details: { name: finalCompanyName, slug, viaInvitation: invitationCode },
       ipAddress,
       userAgent,
     });
